@@ -19,6 +19,8 @@ function App() {
   const [showModal, setShowModal] = useState(false);
 
   const [patchingId, setPatchingId] = useState<number | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
 
   useEffect(() => {
     loadTodos();
@@ -36,12 +38,20 @@ function App() {
     }
   };
 
-  const onAdd = async () => {
-    if (!newTitle.trim()) return;
+const onAdd = async () => {
+  if (!newTitle.trim()) {
+    showToast('Title cannot be empty');
+    return;
+  }
+
+  try {
     const created = await createTodo(newTitle);
     setTodos((prev) => [...prev, created]);
     setNewTitle('');
-  };
+  } catch {
+    showToast('Failed to create todo');
+  }
+};
 
   const onToggle = async (id: number) => {
   try {
@@ -59,6 +69,11 @@ function App() {
   }
 };
 
+  const showToast = (message: string) => {
+  setToast(message);
+  setTimeout(() => setToast(null), 3000);
+};
+
   const onDeleteConfirm = async () => {
     if (selectedId === null) return;
     await deleteTodo(selectedId);
@@ -72,6 +87,12 @@ function App() {
   );
 
   return (
+    <>
+    {toast && (
+      <div style={styles.toast}>
+        {toast}
+      </div>
+    )}
     <div style={styles.page}>
       <div style={styles.card}>
         <h1 style={{ textAlign: 'center' }}>Todo List</h1>
@@ -172,6 +193,7 @@ function App() {
         </div>
       )}
     </div>
+    </>
   );
 }
 
@@ -241,4 +263,17 @@ const styles: Record<string, React.CSSProperties> = {
     width: 300,
     color: '#fff',
   },
+  toast: {
+  position: 'fixed',
+  bottom: 24,
+  left: '50%',
+  transform: 'translateX(-50%)',
+  background: '#e74c3c',
+  color: '#fff',
+  padding: '10px 18px',
+  borderRadius: 8,
+  fontSize: 14,
+  boxShadow: '0 10px 20px rgba(0,0,0,0.4)',
+  zIndex: 9999,
+},
 };
