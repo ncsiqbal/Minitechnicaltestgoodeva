@@ -124,7 +124,7 @@ http://localhost:5173
 - ☑️ Toggle completed status using PATCH
 
 - 🗑 Delete todo with confirmation modal
-- 
+
 - ❌ Error message handling
 
 ---
