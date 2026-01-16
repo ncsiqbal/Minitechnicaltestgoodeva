@@ -1,35 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTodoDto } from './dto/create-todo.dto';
-
-export type Todo = {
-  id: number;
-  title: string;
-  completed: boolean;
-};
 
 @Injectable()
 export class TodosService {
-  private todos: Todo[] = [
+  private todos = [
     { id: 1, title: 'Learn NestJS', completed: false },
     { id: 2, title: 'Build Todo API', completed: true },
   ];
 
-  private nextId = 3;
+  private idCounter = 3;
 
-  findAll(search?: string): Todo[] {
+  findAll(search?: string) {
     if (!search) return this.todos;
 
-    const q = search.trim().toLowerCase();
-    if (!q) return this.todos;
-
     return this.todos.filter((t) =>
-      t.title.toLowerCase().includes(q),
+      t.title.toLowerCase().includes(search.toLowerCase()),
     );
   }
 
-  create(dto: CreateTodoDto): Todo {
-    const todo: Todo = {
-      id: this.nextId++,
+  create(dto: CreateTodoDto) {
+    const todo = {
+      id: this.idCounter++,
       title: dto.title,
       completed: false,
     };
@@ -38,12 +29,24 @@ export class TodosService {
     return todo;
   }
 
-  toggle(id: number): Todo | null {
+  toggle(id: number) {
     const todo = this.todos.find((t) => t.id === id);
-
-    if (!todo) return null;
+    if (!todo) {
+      throw new NotFoundException('Todo not found');
+    }
 
     todo.completed = !todo.completed;
     return todo;
+  }
+
+  remove(id: number) {
+    const index = this.todos.findIndex((t) => t.id === id);
+    if (index === -1) {
+      throw new NotFoundException('Todo not found');
+    }
+
+    const deleted = this.todos[index];
+    this.todos.splice(index, 1);
+    return deleted;
   }
 }

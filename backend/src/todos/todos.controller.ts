@@ -1,12 +1,13 @@
 import {
-  Body,
   Controller,
   Get,
   Post,
   Patch,
+  Delete,
+  Body,
   Param,
+  ParseIntPipe,
   Query,
-  NotFoundException,
 } from '@nestjs/common';
 import { TodosService } from './todos.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
@@ -16,23 +17,22 @@ export class TodosController {
   constructor(private readonly todosService: TodosService) {}
 
   @Get()
-  getTodos(@Query('search') search?: string) {
+  findAll(@Query('search') search?: string) {
     return this.todosService.findAll(search);
   }
 
   @Post()
-  createTodo(@Body() body: CreateTodoDto) {
-    return this.todosService.create(body);
+  create(@Body() dto: CreateTodoDto) {
+    return this.todosService.create(dto);
   }
 
   @Patch(':id')
-  toggleTodo(@Param('id') id: string) {
-    const result = this.todosService.toggle(Number(id));
+  toggle(@Param('id', ParseIntPipe) id: number) {
+    return this.todosService.toggle(id);
+  }
 
-    if (!result) {
-      throw new NotFoundException('Todo not found');
-    }
-
-    return result;
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.todosService.remove(id);
   }
 }
